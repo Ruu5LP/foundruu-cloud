@@ -1,0 +1,60 @@
+name: Build Dashboard
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Generate dashboards
+        run: |
+          mkdir -p site
+          projects=$(ls reports 2>/dev/null || true)
+          for p in $projects; do
+            npx -y foundruu dashboard --dir "reports/$p" --out "site/$p.html" || echo "skip $p"
+          done
+          node -e '
+            const fs = require("fs");
+            const projects = fs.existsSync("reports") ? fs.readdirSync("reports").filter((p) => fs.statSync(`reports/${p}`).isDirectory()) : [];
+            const items = projects.map((p) => {
+              const files = fs.readdirSync(`reports/${p}`).filter((f) => f.endsWith(".json")).sort();
+              const latest = files.length ? JSON.parse(fs.readFileSync(`reports/${p}/${files[files.length-1]}`, "utf8")) : null;
+              const score = latest ? `${latest.overall}点` : "-";
+              return `<li><a href="./${p}.html">${p}</a> — 最新スコア: <b>${score}</b>(レポート${files.length}件)</li>`;
+            }).join("\n");
+            fs.writeFileSync("site/index.html", `<!doctype html>
+          <html lang="ja"><head><meta charset="utf-8"><title>FoundRuu Cloud</title>
+          <style>body{font-family:-apple-system,"Hiragino Sans",sans-serif;margin:2rem auto;max-width:50rem;padding:0 1rem}</style>
+          </head><body><h1>FoundRuu Cloud</h1><p>プロジェクト別 AI開発品質ダッシュボード</p><ul>${items || "<li>まだレポートがありません</li>"}</ul></body></html>`);
+          '
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
