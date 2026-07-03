@@ -1,0 +1,51 @@
+{
+  "since": "main",
+  "diff": {
+    "files": 0,
+    "insertions": 0,
+    "deletions": 0
+  },
+  "scores": [
+    {
+      "category": "requirements",
+      "label": "要件品質",
+      "docPath": "docs/requirements.md",
+      "score": 100,
+      "failed": []
+    },
+    {
+      "category": "design",
+      "label": "設計品質",
+      "score": 0,
+      "failed": [
+        {
+          "label": "design ドキュメントが見つからない",
+          "improvement": "docs/ または .ai/sessions/<session>/ に design.md を作成する"
+        }
+      ]
+    },
+    {
+      "category": "test",
+      "label": "テスト品質",
+      "score": 0,
+      "failed": [
+        {
+          "label": "test ドキュメントが見つからない",
+          "improvement": "docs/ または .ai/sessions/<session>/ に test.md を作成する"
+        }
+      ]
+    },
+    {
+      "category": "aiInstructions",
+      "label": "AI指示品質",
+      "score": 0,
+      "failed": [
+        {
+          "label": "aiInstructions ドキュメントが見つからない",
+          "improvement": "docs/ または .ai/sessions/<session>/ に aiInstructions.md を作成する"
+        }
+      ]
+    }
+  ],
+  "overall": 25
+}
