@@ -23,12 +23,17 @@ jobs:
         with:
           node-version: '24'
 
+      # dashboard コマンドは foundruu 本体からプラグインへ分離されたため、両方インストールする
+      # (foundruu はカレントの node_modules から foundruu-plugin-* を自動発見する)
+      - name: Install foundruu + cloud plugin
+        run: npm install --no-save foundruu foundruu-plugin-cloud
+
       - name: Generate dashboards
         run: |
           mkdir -p site
           projects=$(ls reports 2>/dev/null || true)
           for p in $projects; do
-            npx -y foundruu dashboard --dir "reports/$p" --out "site/$p.html" || echo "skip $p"
+            npx foundruu dashboard --dir "reports/$p" --out "site/$p.html" || echo "skip $p"
           done
           node -e '
             const fs = require("fs");
